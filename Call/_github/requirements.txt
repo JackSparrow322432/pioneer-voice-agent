@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+websockets>=13
+openai>=1.50
+python-dotenv>=1.0
+tzdata
+audioop-lts; python_version >= "3.13"

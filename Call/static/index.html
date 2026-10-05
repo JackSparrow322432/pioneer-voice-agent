@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pioneer — ИИ-продажник</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1c1f24; --muted:#6b7280; --line:#e5e7eb; --accent:#1f6feb; --ok:#1a7f37; --warn:#b54708; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --card:#171a21; --text:#e6e8eb; --muted:#9aa3ae; --line:#2a2f38; --accent:#4c8dff; --ok:#3fb950; --warn:#e3a008; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:15px; margin:0 0 12px; }
+  .sub { color:var(--muted); margin-bottom:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  input, textarea { font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); min-width:0; }
+  input { flex:1 1 180px; } textarea { width:100%; min-height:54px; margin-top:8px; }
+  button { font:inherit; padding:8px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; }
+  tr.click { cursor:pointer; } tr.click:hover { background:var(--bg); }
+  .scroll { overflow-x:auto; }
+  .msg { padding:6px 10px; border-radius:8px; margin:4px 0; max-width:85%; }
+  .agent { background:rgba(31,111,235,.12); } .client { background:rgba(26,127,55,.12); margin-left:auto; }
+  .tool { color:var(--muted); font-family:ui-monospace, monospace; font-size:12px; }
+  #status { margin-top:8px; color:var(--muted); }
+  .hot { color:var(--ok); font-weight:600; } .warm { color:var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pioneer — голосовой ИИ-продажник</h1>
+  <div class="sub">Тестовый режим · Zadarma + Asterisk + OpenAI Realtime</div>
+
+  <div class="card">
+    <h2>Позвонить</h2>
+    <div class="row">
+      <input id="token" type="password" placeholder="ADMIN_TOKEN">
+      <input id="to" placeholder="+7 777 123 45 67">
+      <input id="name" placeholder="Имя клиента">
+    </div>
+    <textarea id="reason" placeholder="Повод звонка, напр.: оставил заявку на сайте на зимний детский лагерь для сына 9 лет"></textarea>
+    <div class="row" style="margin-top:8px"><button id="callBtn">Позвонить</button><button class="ghost" id="refresh">Обновить</button></div>
+    <div id="status"></div>
+  </div>
+
+  <div class="card"><h2>Звонки</h2><div class="scroll"><table id="calls"></table></div></div>
+  <div class="card" id="detail" hidden><h2>Расшифровка</h2><div id="transcript"></div></div>
+  <div class="card"><h2>Заявки</h2><div class="scroll"><table id="leads"></table></div></div>
+  <div class="card"><h2>Перезвонить</h2><div class="scroll"><table id="callbacks"></table></div></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+try { $("token").value = localStorage.getItem("adminToken") || ""; } catch (e) {}
+$("token").addEventListener("change", () => { try { localStorage.setItem("adminToken", $("token").value); } catch (e) {} });
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", "X-Admin-Token": $("token").value, ...(opts.headers || {}) } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || r.statusText);
+  return body;
+}
+
+function table(el, cols, rows, onClick) {
+  el.innerHTML = "<tr>" + cols.map(c => `<th>${c[1]}</th>`).join("") + "</tr>" +
+    (rows.length ? rows.map((r, i) => `<tr class="${onClick ? "click" : ""}" data-i="${i}">` +
+      cols.map(c => `<td class="${c[0] === "interest" ? esc(r[c[0]]) : ""}">${esc(r[c[0]])}</td>`).join("") + "</tr>").join("")
+      : `<tr><td colspan="${cols.length}" style="color:var(--muted)">пока пусто</td></tr>`);
+  if (onClick) el.querySelectorAll("tr[data-i]").forEach(tr => tr.onclick = () => onClick(rows[+tr.dataset.i]));
+}
+
+async function load() {
+  try {
+    const calls = await api("/api/calls");
+    table($("calls"), [["started_at","Начало"],["direction","Тип"],["phone","Номер"],["lead_name","Имя"],["status","Статус"],["outcome","Итог"],["duration","Сек"]], calls, showCall);
+    const d = await api("/api/leads");
+    table($("leads"), [["created_at","Когда"],["name","Имя"],["phone","Номер"],["service_ids","Услуги"],["date_from","С"],["date_to","По"],["adults","Взр."],["children_ages","Дети"],["interest","Интерес"],["notes","Заметки"]], d.leads);
+    table($("callbacks"), [["created_at","Когда"],["phone","Номер"],["when_text","Перезвонить"],["reason","Причина"]], d.callbacks);
+    $("status").textContent = "";
+  } catch (e) { $("status").textContent = "Ошибка: " + e.message; }
+}
+
+async function showCall(c) {
+  const d = await api("/api/calls/" + c.call_sid);
+  $("detail").hidden = false;
+  $("transcript").innerHTML = d.transcript.map(m => m.role === "tool"
+    ? `<div class="tool">⚙ ${esc(m.text)}</div>`
+    : `<div class="msg ${m.role}">${esc(m.text)}</div>`).join("") || "<div style='color:var(--muted)'>нет реплик</div>";
+  $("detail").scrollIntoView({ behavior: "smooth" });
+}
+
+$("callBtn").onclick = async () => {
+  $("status").textContent = "Звоню…";
+  try {
+    const r = await api("/api/call", { method: "POST", body: JSON.stringify({ to: $("to").value, lead_name: $("name").value, reason: $("reason").value }) });
+    $("status").textContent = "Звонок создан: " + r.call_sid;
+    setTimeout(load, 1500);
+  } catch (e) { $("status").textContent = "Ошибка: " + e.message; }
+};
+$("refresh").onclick = load;
+load(); setInterval(load, 10000);
+</script>
+</body>
+</html>

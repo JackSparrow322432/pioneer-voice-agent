@@ -1,0 +1,36 @@
+{
+  "_note": "ДЕМО-КАТАЛОГ. Описания взяты с skiparkpioneer.kz, а цены — заглушки (null). Впишите реальные цены и даты перед тестом с людьми. Если цена null, агент НЕ называет сумму, а обещает расчёт менеджера.",
+  "resort": {
+    "name": "Горный курорт «Пионер» (Ski Park Pioneer)",
+    "address": "Алматы, Медеуский район, Алма-Тау, 27 (Заилийский Алатау)",
+    "phone": "+7 771 990 51 74",
+    "site": "skiparkpioneer.kz",
+    "highlights": [
+      "семейный курорт с 2015 года",
+      "трассы около 3000 м с сертификацией FIS, высота более 2000 м",
+      "детский лагерь — более 1000 детей в год",
+      "инклюзивная / адаптивная горнолыжная программа «Pioneer Concept»",
+      "можно привозить свою еду"
+    ]
+  },
+  "services": [
+    {"id": "ski_pass", "category": "ski", "name": "Ски-пасс (подъёмники)", "description": "Магнитная карта на подъёмники.", "price_kzt": null, "unit": "день"},
+    {"id": "ski_school", "category": "ski", "name": "Горнолыжная школа", "description": "Инструкторы, дети с 3 лет (размер обуви от 25).", "price_kzt": null, "unit": "занятие"},
+    {"id": "rental", "category": "ski", "name": "Прокат снаряжения", "description": "Лыжи, сноуборды, ботинки.", "price_kzt": null, "unit": "день"},
+    {"id": "bungalow", "category": "stay", "name": "Бунгало у склона", "description": "Отдельные домики прямо у трассы.", "price_kzt": null, "unit": "сутки", "capacity": null},
+    {"id": "hotel_panorama", "category": "stay", "name": "Отель «Панорама»", "description": "Номера комфорт-класса.", "price_kzt": null, "unit": "сутки", "capacity": null},
+    {"id": "hotel_pioneer", "category": "stay", "name": "Отель «Пионер»", "description": "Бюджетный вариант, формат хостела.", "price_kzt": null, "unit": "место/сутки"},
+    {"id": "cottage", "category": "stay", "name": "Коттедж с сауной", "description": "Для семьи или компании, с сауной.", "price_kzt": null, "unit": "сутки", "capacity": null},
+    {"id": "kids_camp", "category": "camp", "name": "Детский лагерь", "description": "Дети 7–17 лет, смены на школьных каникулах (лето, осень, зима).", "price_kzt": null, "unit": "смена"},
+    {"id": "adaptive_ski", "category": "camp", "name": "Адаптивное катание (Pioneer Concept)", "description": "Инклюзивная программа для детей с особенностями развития.", "price_kzt": null, "unit": "занятие"},
+    {"id": "teambuilding", "category": "corporate", "name": "Тимбилдинг", "description": "Проживание, питание и активности для команды.", "price_kzt": null, "unit": "по запросу"},
+    {"id": "hiking", "category": "activity", "name": "Походы в горы", "description": "По выходным, с ночёвкой и без.", "price_kzt": null, "unit": "человек"},
+    {"id": "horse_riding", "category": "activity", "name": "Конные прогулки", "description": "Выезды на лошадях.", "price_kzt": null, "unit": "час"},
+    {"id": "sauna", "category": "activity", "name": "Финская сауна", "description": "", "price_kzt": null, "unit": "час"},
+    {"id": "transfer", "category": "transport", "name": "Трансфер", "description": "Индивидуальный трансфер или микроавтобус на 13 мест.", "price_kzt": null, "unit": "поездка"}
+  ],
+  "promotions": [
+    {"id": "demo_early", "text": "ДЕМО-АКЦИЯ (заменить): скидка 10% при бронировании зимнего лагеря до 1 ноября.", "active": true}
+  ],
+  "blocked_dates": []
+}
