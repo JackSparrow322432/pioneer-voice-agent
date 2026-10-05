@@ -8,7 +8,7 @@
 ![OpenAI](https://img.shields.io/badge/OpenAI-Realtime%20API-412991?logo=openai&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> 🇷🇺 Инструкция на русском: [README.ru.md](README.ru.md) · 🛠 Troubleshooting: [docs/troubleshooting.md](docs/troubleshooting.md)
+
 
 ---
 
